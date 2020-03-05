@@ -84,24 +84,25 @@ def pick_item(request):
     player_id = request.data.get("player_id")
     item_id = request.data.get("item_id")
     room_id = request.data.get("room_id")
-    room_exists = Room.objects.filter(id=room_id).exists()
-    item_exists = Item.objects.filter(id=item_id).exists()
-    player_exists = Player.objects.filter(id=player_id).exists()
-    if player_id is not "null" or item_id is not "null" or room_id is not "null":
-        if room_exists is not False or room_id is not False or item_exists is not False:
-            room = Room.objects.get(id=room_id).item.id
+    if player_id is not None and item_id is not None and room_id is not None:
+        room_exists = Room.objects.filter(id=room_id).exists()
+        item_exists = Item.objects.filter(id=item_id).exists()
+        player_exists = Player.objects.filter(uuid=player_id).exists()
+        if room_exists is not False and player_exists is not False and item_exists is not False:
+            room = Room.objects.get(id=room_id)
+            if room.item.id == item_id:
+                room.item_id = 0
+                room.save()
+                player = Player.objects.get(uuid=player_id)
+                player.item_id = item_id
+                player.save()
+                return JsonResponse({'message': "User picked up item"}, safe=True, status=200)
+            else:
+                return JsonResponse({'error': "Room does not have this item"}, safe=True, status=400)
         else:
             return JsonResponse({'error': f"player_id:{player_exists}, item_id:{item_exists}, room_id:{room_exists} - one of the entries do no exist in the database"}, safe=True, status=400)
     else:
-        return JsonResponse({'error': f"player_id:{player_id}, item_id:{item_id}, room_id:{room_id} - one of these are being recieved as a null value"}, safe=True, status=400)
-
-    """
-    first recieve request, take player id, item id, room id
-    room.item will switch from 1 to 0
-    player.item will switch from 0 to 1
-    """
-
-    return JsonResponse({'error': room}, safe=True, status=500)
+        return JsonResponse({'error': f"player_id:{player_id}, item_id:{item_id}, room_id:{room_id} - one of these are being recieved as a null value, {player}"}, safe=True, status=400)
 
 
 @api_view(["POST"])
@@ -134,5 +135,5 @@ def steal_item(request):
     return JsonResponse({'error': "Not yet implemented"}, safe=True, status=500)
 
 # edge cases item doesnt exist, players doesnt exists, room doesnt exists
-## room is not walkable
+# room is not walkable
 # to do  - still need to figure out how to check if player or room or item does not exist and properly handling that error
