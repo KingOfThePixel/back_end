@@ -93,6 +93,13 @@ def fetch_maps(request):
              for i in range((len(rooms) + n - 1) // n)]
     return JsonResponse({"map": final}, safe=True, status=200)
 
+@api_view(["GET"])
+def all_players_on_map(request):
+    player = list(Player.objects.values())
+    players = [{"id":o.get("id"), "x":o.get("x"), "y":o.get("y")} for o in player]
+    
+    return JsonResponse({"players": players}, safe=True, status=200)
+
 
 @api_view(["POST"])
 def pick_item(request):
