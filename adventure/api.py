@@ -20,9 +20,10 @@ def initialize(request):
     player = user.player
     player_id = player.id
     uuid = player.uuid
-    room = player.room()
+    room_id = player.room()
+    room = Room.objects.get(id=room_id)
     players = room.playerNames(player_id)
-    return JsonResponse({'uuid': uuid, 'name': player.user.username, 'title': room.title, 'description': room.description, 'players': players}, safe=True)
+    return JsonResponse({'uuid': uuid, 'name': player.user.username, 'players': players}, safe=True)
 
 
 @csrf_exempt
@@ -69,16 +70,16 @@ def move(request):
 @csrf_exempt
 @api_view(["POST"])
 def say(request):
-    # IMPLEMENT
-    """
-    grab request player
-    get what player said
-    what room is that player in 
-    who else is in the room
+    player = request.user.player
+    message = request.data.get("message")
+    player_id = player.id
+    player_uuid = player.uuid
+    room = player.room()
     currentPlayerUUIDs = room.playerUUIDs(player_id)
-    then for every player 
-    """
-    return JsonResponse({'error': "Not yet implemented"}, safe=True, status=500)
+    for p_uuid in currentPlayerUUIDs:
+        pusher.trigger(f'p-channel-{p_uuid}', u'broadcast', {
+                       'message': f'{player.user.username} says {message}.'})
+    return JsonResponse({'name': player.user.username, 'message': message, 'players': players, 'error_msg': ""}, safe=True)
 
 
 @api_view(["GET"])

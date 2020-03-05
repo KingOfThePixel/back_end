@@ -69,11 +69,7 @@ class Player(models.Model):
             self.save()
 
     def room(self):
-        try:
-            return Room.objects.get(id=self.currentRoom)
-        except Room.DoesNotExist:
-            self.initialize()
-            return self.room()
+        return self.currentRoom
 
 
 @receiver(post_save, sender=User)
