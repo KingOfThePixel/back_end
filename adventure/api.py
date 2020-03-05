@@ -102,7 +102,7 @@ def pick_item(request):
         else:
             return JsonResponse({'error': f"player_id:{player_exists}, item_id:{item_exists}, room_id:{room_exists} - one of the entries do no exist in the database"}, safe=True, status=400)
     else:
-        return JsonResponse({'error': f"player_id:{player_id}, item_id:{item_id}, room_id:{room_id} - one of these are being recieved as a null value, {player}"}, safe=True, status=400)
+        return JsonResponse({'error': f"player_id:{player_id}, item_id:{item_id}, room_id:{room_id} - one of these are being recieved as a null value"}, safe=True, status=400)
 
 
 @api_view(["POST"])
@@ -128,7 +128,7 @@ def drop_item(request):
         else:
             return JsonResponse({'error': f"player_id:{player_exists}, item_id:{item_exists}, room_id:{room_exists} - one of the entries do no exist in the database"}, safe=True, status=400)
     else:
-        return JsonResponse({'error': f"player_id:{player_id}, item_id:{item_id}, room_id:{room_id} - one of these are being recieved as a null value, {player}"}, safe=True, status=400)
+        return JsonResponse({'error': f"player_id:{player_id}, item_id:{item_id}, room_id:{room_id} - one of these are being recieved as a null value"}, safe=True, status=400)
 
 
 @api_view(["POST"])
@@ -136,15 +136,24 @@ def steal_item(request):
     victim_player_id = request.data.get("victim_player_id")
     thief_player_id = request.data.get("thief_player_id")
     item_id = request.data.get("item_id")
-    if victim_player_id == null or thief_player_id == null or item_id == null:
+    if victim_player_id is not None and item_id is not None and thief_player_id is not None:
+        thief_player_exists = Player.objects.filter(
+            uuid=thief_player_id).exists()
+        item_exists = Item.objects.filter(id=item_id).exists()
+        victim_player_exists = Player.objects.filter(
+            uuid=victim_player_id).exists()
+        if thief_player_exists is not False and victim_player_exists is not False and item_exists is not False:
+            victim_player = Player.objects.get(uuid=victim_player_id)
+            if victim_player.item.id == item_id:
+                thief_player = Player.objects.get(uuid=thief_player_id)
+                thief_player.item_id = item_id
+                thief_player.save()
+                victim_player.item_id = 0
+                victim_player.save()
+                return JsonResponse({'message': "Thief stole item from victim item"}, safe=True, status=200)
+            else:
+                return JsonResponse({'error': "Victim does not have this item"}, safe=True, status=400)
+        else:
+            return JsonResponse({'error': f"victim_player_id:{victim_player_exists}, item_id:{item_exists}, thief_player_id:{thief_player_exists} - one of the entries do no exist in the database"}, safe=True, status=400)
+    else:
         return JsonResponse({'error': f"victim_player_id:{victim_player_id}, item_id:{item_id}, thief_player_id:{thief_player_id} - one of these are being recieved as a null value"}, safe=True, status=400)
-    """
-    first recieve request, take player id victim, player id, thief item id
-    victim.item will switch from 0 to 1
-    thief.item will switch from 1 to 0
-    """
-    return JsonResponse({'error': "Not yet implemented"}, safe=True, status=500)
-
-# edge cases item doesnt exist, players doesnt exists, room doesnt exists
-# room is not walkable
-# to do  - still need to figure out how to check if player or room or item does not exist and properly handling that error
