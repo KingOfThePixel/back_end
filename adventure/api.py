@@ -46,6 +46,8 @@ def move(request):
     if nextRoomID is not None and nextRoomID > 0:
         nextRoom = Room.objects.get(id=nextRoomID)
         player.currentRoom=nextRoomID
+        player.x = nextRoom.x
+        player.y = nextRoom.y
         player.save()
         players = nextRoom.playerNames(player_id)
         currentPlayerUUIDs = room.playerUUIDs(player_id)
@@ -64,4 +66,21 @@ def move(request):
 @api_view(["POST"])
 def say(request):
     # IMPLEMENT
+    return JsonResponse({'error':"Not yet implemented"}, safe=True, status=500)
+
+@api_view(["GET"])
+def fetch_maps(request):
+    rooms = list(Room.objects.values())
+    return JsonResponse({"map": rooms}, safe=True, status=200)
+
+@api_view(["POST"])
+def pick_item(request):
+    return JsonResponse({'error':"Not yet implemented"}, safe=True, status=500)
+
+@api_view(["POST"])
+def drop_item(request):
+    return JsonResponse({'error':"Not yet implemented"}, safe=True, status=500)
+
+@api_view(["POST"])
+def steal_item(request):
     return JsonResponse({'error':"Not yet implemented"}, safe=True, status=500)

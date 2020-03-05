@@ -4,6 +4,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from rest_framework.authtoken.models import Token
 import uuid
+import random
 
 
 class Item(models.Model):
@@ -18,7 +19,7 @@ class Room(models.Model):
     x = models.IntegerField(default=0)
     y = models.IntegerField(default=0)
     is_path = models.BooleanField(default=True)
-    is_spawn= models.BooleanField(default=False)
+    is_spawn = models.BooleanField(default=False)
     item = models.ForeignKey(Item, on_delete=models.CASCADE, default=0)
 
     def connect_rooms(self, destinationRoom, direction):
@@ -59,7 +60,10 @@ class Player(models.Model):
 
     def initialize(self):
         if self.currentRoom == 0:
-            self.currentRoom = Room.objects.first().id
+            rooms = Room.objects.all()
+            spawn_rooms = [room for room in rooms if room.is_spawn == 1]
+            random_room = random.randint(0, len(spawn_rooms)-1)
+            self.currentRoom = spawn_rooms[random_room]
             self.save()
 
     def room(self):
