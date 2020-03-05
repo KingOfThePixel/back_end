@@ -63,7 +63,7 @@ class Player(models.Model):
             rooms = Room.objects.all()
             spawn_rooms = [room for room in rooms if room.is_spawn == 1]
             random_room = random.randint(0, len(spawn_rooms)-1)
-            self.currentRoom = spawn_rooms[random_room]
+            self.currentRoom = spawn_rooms[random_room].id
             self.save()
 
     def room(self):
