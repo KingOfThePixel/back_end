@@ -36,7 +36,8 @@ def move(request):
     player_uuid = player.uuid
     data = json.loads(request.body)
     direction = data['direction']
-    room = player.room()
+    room_id = player.room()
+    room = Room.objects.get(id=room_id)
     nextRoomID = None
     if direction == "n":
         nextRoomID = room.n_to
@@ -74,7 +75,8 @@ def say(request):
     message = request.data.get("message")
     player_id = player.id
     player_uuid = player.uuid
-    room = player.room()
+    room_id = player.room()
+    room = Room.objects.get(id=room_id)
     currentPlayerUUIDs = room.playerUUIDs(player_id)
     for p_uuid in currentPlayerUUIDs:
         pusher.trigger(f'p-channel-{p_uuid}', u'broadcast', {
