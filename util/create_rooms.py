@@ -28,22 +28,24 @@ class World:
             room.save()
             room_count += 1
         rooms = Room.objects.all()
-        for idx, value in enumerate(rooms):
+        for value in rooms:
             threshold = random.randint(0, 100)
             if threshold < 25:
                 value.is_path = 0
                 value.save()
+        for idx, value in enumerate(rooms):
             if (idx + size_x) < len(rooms):
-                if value.is_path:
+                if value.is_path  and rooms[idx+size_x].is_path:
+                    print(rooms[idx+size_x], rooms[idx+size_x].is_path, idx+size_x)
                     rooms[idx].connect_rooms(rooms[idx+size_x], "s")
             if (idx - size_x) >= 0:
-                if value.is_path:
+                if value.is_path and rooms[idx-size_x].is_path:
                     rooms[idx].connect_rooms(rooms[idx-size_x], "n")
             if idx % size_x < size_x-1:
-                if value.is_path:
+                if value.is_path and rooms[idx+1].is_path:
                     rooms[idx].connect_rooms(rooms[idx+1], "e")
             if idx % size_x > 0:
-                if value.is_path:
+                if value.is_path and rooms[idx-1].is_path:
                     rooms[idx].connect_rooms(rooms[idx-1], "w")
             x = idx % size_x
             y = idx // size_x
@@ -97,8 +99,8 @@ class World:
 
 
 w = World()
-num_rooms = 625
-width = 25
-height = 25
+num_rooms = 25
+width = 5
+height = 5
 w.generate_rooms(width, height, num_rooms)
 w.print_rooms()

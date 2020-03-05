@@ -63,7 +63,9 @@ class Player(models.Model):
             rooms = Room.objects.all()
             spawn_rooms = [room for room in rooms if room.is_spawn == 1]
             random_room = random.randint(0, len(spawn_rooms)-1)
-            self.currentRoom = spawn_rooms[random_room]
+            self.currentRoom = spawn_rooms[random_room].id
+            self.x = spawn_rooms[random_room].x
+            self.y = spawn_rooms[random_room].y
             self.save()
 
     def room(self):
@@ -77,8 +79,9 @@ class Player(models.Model):
 @receiver(post_save, sender=User)
 def create_user_player(sender, instance, created, **kwargs):
     if created:
-        Player.objects.create(user=instance)
+        player = Player.objects.create(user=instance)
         Token.objects.create(user=instance)
+        Player.initialize(player)
 
 
 @receiver(post_save, sender=User)
