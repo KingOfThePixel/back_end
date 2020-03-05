@@ -110,14 +110,25 @@ def drop_item(request):
     player_id = request.data.get("player_id")
     item_id = request.data.get("item_id")
     room_id = request.data.get("room_id")
-    if player_id == null or item_id == null or room_id == null:
-        return JsonResponse({'error': f"player_id:{player_id}, item_id:{item_id}, room_id:{room_id} - one of these are being recieved as a null value"}, safe=True, status=400)
-    """
-    first recieve request, take player id, item id, room id
-    room.item will switch from 0 to 1
-    player.item will switch from 1 to 0
-    """
-    return JsonResponse({'error': "Not yet implemented"}, safe=True, status=500)
+    if player_id is not None and item_id is not None and room_id is not None:
+        room_exists = Room.objects.filter(id=room_id).exists()
+        item_exists = Item.objects.filter(id=item_id).exists()
+        player_exists = Player.objects.filter(uuid=player_id).exists()
+        if room_exists is not False and player_exists is not False and item_exists is not False:
+            player = Player.objects.get(uuid=player_id)
+            if player.item.id == item_id:
+                room = Room.objects.get(id=room_id)
+                room.item_id = item_id
+                room.save()
+                player.item_id = 0
+                player.save()
+                return JsonResponse({'message': "User dropped item"}, safe=True, status=200)
+            else:
+                return JsonResponse({'error': "Player does not have this item"}, safe=True, status=400)
+        else:
+            return JsonResponse({'error': f"player_id:{player_exists}, item_id:{item_exists}, room_id:{room_exists} - one of the entries do no exist in the database"}, safe=True, status=400)
+    else:
+        return JsonResponse({'error': f"player_id:{player_id}, item_id:{item_id}, room_id:{room_id} - one of these are being recieved as a null value, {player}"}, safe=True, status=400)
 
 
 @api_view(["POST"])
