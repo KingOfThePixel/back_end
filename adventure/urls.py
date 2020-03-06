@@ -9,6 +9,6 @@ urlpatterns = [
     url('grab', api.pick_item),
     url('drop', api.drop_item),
     url('steal', api.steal_item),
-    url('coords', api.all_players_on_map)
+    url('coords', api.all_players_on_map),
 
 ]

@@ -54,14 +54,6 @@ def move(request):
         player.y = nextRoom.y
         player.save()
         players = nextRoom.playerNames(player_id)
-        currentPlayerUUIDs = room.playerUUIDs(player_id)
-        nextPlayerUUIDs = nextRoom.playerUUIDs(player_id)
-        for p_uuid in currentPlayerUUIDs:
-            pusher.trigger(f'p-channel-{p_uuid}', u'broadcast', {
-                           'message': f'{player.user.username} has walked {dirs[direction]}.'})
-        for p_uuid in nextPlayerUUIDs:
-            pusher.trigger(f'p-channel-{p_uuid}', u'broadcast', {
-                           'message': f'{player.user.username} has entered from the {reverse_dirs[direction]}.'})
         return JsonResponse({'name': player.user.username, 'room': nextRoomID, "x": player.x, "y":player.y ,  'players': players, 'error_msg': ""}, safe=True)
     else:
         players = room.playerNames(player_id)
@@ -80,7 +72,7 @@ def say(request):
     currentPlayerUUIDs = room.playerUUIDs(player_id)
     players = room.playerNames(player_id)
     for p_uuid in currentPlayerUUIDs:
-        pusher.trigger(f'p-channel-{p_uuid}', u'broadcast', {
+        pusher.trigger(f'chat', u'broadcast', {
                        'message': f'{player.user.username} says {message}.'})
     return JsonResponse({'name': player.user.username, 'message': message, 'players': players, 'error_msg': ""}, safe=True)
 
@@ -94,8 +86,9 @@ def fetch_maps(request):
 
 @api_view(["GET"])
 def all_players_on_map(request):
+    this_player= player = request.user.player.id
     player = list(Player.objects.values())
-    players = [{"id":o.get("id"), "x":o.get("x"), "y":o.get("y")} for o in player]
+    players = [{"id":o.get("id"), "x":o.get("x"), "y":o.get("y")} for o in player if o.get("id") != this_player]
     
     return JsonResponse({"players": players}, safe=True, status=200)
 
