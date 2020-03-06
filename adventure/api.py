@@ -78,6 +78,7 @@ def say(request):
     room_id = player.room()
     room = Room.objects.get(id=room_id)
     currentPlayerUUIDs = room.playerUUIDs(player_id)
+    players = room.playerNames(player_id)
     for p_uuid in currentPlayerUUIDs:
         pusher.trigger(f'p-channel-{p_uuid}', u'broadcast', {
                        'message': f'{player.user.username} says {message}.'})
@@ -91,6 +92,13 @@ def fetch_maps(request):
     final = [rooms[i * n:(i + 1) * n]
              for i in range((len(rooms) + n - 1) // n)]
     return JsonResponse({"map": final}, safe=True, status=200)
+
+@api_view(["GET"])
+def all_players_on_map(request):
+    player = list(Player.objects.values())
+    players = [{"id":o.get("id"), "x":o.get("x"), "y":o.get("y")} for o in player]
+    
+    return JsonResponse({"players": players}, safe=True, status=200)
 
 
 @api_view(["POST"])
