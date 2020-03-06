@@ -23,7 +23,7 @@ def initialize(request):
     room_id = player.room()
     room = Room.objects.get(id=room_id)
     players = room.playerNames(player_id)
-    return JsonResponse({'uuid': uuid, 'name': player.user.username, 'players': players}, safe=True)
+    return JsonResponse({'uuid': uuid, 'name': player.user.username, "x": player.x, "y":player.y ,'players': players}, safe=True)
 
 
 @csrf_exempt
@@ -62,7 +62,7 @@ def move(request):
         for p_uuid in nextPlayerUUIDs:
             pusher.trigger(f'p-channel-{p_uuid}', u'broadcast', {
                            'message': f'{player.user.username} has entered from the {reverse_dirs[direction]}.'})
-        return JsonResponse({'name': player.user.username, 'room': nextRoomID, 'players': players, 'error_msg': ""}, safe=True)
+        return JsonResponse({'name': player.user.username, 'room': nextRoomID, "x": player.x, "y":player.y ,  'players': players, 'error_msg': ""}, safe=True)
     else:
         players = room.playerNames(player_id)
         return JsonResponse({'name': player.user.username,  'room': nextRoomID, 'players': players, 'error_msg': "You cannot move that way."}, safe=True)
