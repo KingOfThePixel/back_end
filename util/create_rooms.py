@@ -30,13 +30,12 @@ class World:
         rooms = Room.objects.all()
         for value in rooms:
             threshold = random.randint(0, 100)
-            if threshold < 25:
+            if threshold < 15:
                 value.is_path = 0
                 value.save()
         for idx, value in enumerate(rooms):
             if (idx + size_x) < len(rooms):
                 if value.is_path  and rooms[idx+size_x].is_path:
-                    print(rooms[idx+size_x], rooms[idx+size_x].is_path, idx+size_x)
                     rooms[idx].connect_rooms(rooms[idx+size_x], "s")
             if (idx - size_x) >= 0:
                 if value.is_path and rooms[idx-size_x].is_path:
