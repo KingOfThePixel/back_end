@@ -111,7 +111,7 @@ def pick_item(request):
         player_exists = Player.objects.filter(uuid=player_id).exists()
         if room_exists is not False and player_exists is not False and item_exists is not False:
             room = Room.objects.get(id=room_id)
-            if room.item.id == item_id:
+            if room.item_id == item_id:
                 room.item_id = 0
                 room.save()
                 player = Player.objects.get(uuid=player_id)
