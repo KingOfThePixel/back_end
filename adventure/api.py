@@ -23,7 +23,7 @@ def initialize(request):
     room_id = player.room()
     room = Room.objects.get(id=room_id)
     players = room.playerNames(player_id)
-    return JsonResponse({'uuid': uuid, 'name': player.user.username, "x": player.x, "y":player.y ,'players': players}, safe=True)
+    return JsonResponse({'uuid': uuid, 'name': player.user.username, "x": player.x, "y": player.y, 'players': players}, safe=True)
 
 
 @csrf_exempt
@@ -54,7 +54,7 @@ def move(request):
         player.y = nextRoom.y
         player.save()
         players = nextRoom.playerNames(player_id)
-        return JsonResponse({'name': player.user.username, 'room': nextRoomID, "x": player.x, "y":player.y ,  'players': players, 'error_msg': ""}, safe=True)
+        return JsonResponse({'name': player.user.username, 'room': nextRoomID, "x": player.x, "y": player.y,  'players': players, 'error_msg': ""}, safe=True)
     else:
         players = room.playerNames(player_id)
         return JsonResponse({'name': player.user.username,  'room': nextRoomID, 'players': players, 'error_msg': "You cannot move that way."}, safe=True)
@@ -69,11 +69,9 @@ def say(request):
     player_uuid = player.uuid
     room_id = player.room()
     room = Room.objects.get(id=room_id)
-    currentPlayerUUIDs = room.playerUUIDs(player_id)
     players = room.playerNames(player_id)
-    for p_uuid in currentPlayerUUIDs:
-        pusher.trigger(f'chat', u'broadcast', {
-                       'message': f'{player.user.username} says {message}.'})
+    pusher.trigger(f'chat', u'broadcast', {
+        'message': f'{player.user.username} says {message}.'})
     return JsonResponse({'name': player.user.username, 'message': message, 'players': players, 'error_msg': ""}, safe=True)
 
 
@@ -81,15 +79,18 @@ def say(request):
 def fetch_maps(request):
     rooms = list(Room.objects.values().order_by("id"))
     n = 25
-    final = [rooms[i * n:(i + 1) * n] for i in range((len(rooms) + n - 1) // n)]
+    final = [rooms[i * n:(i + 1) * n]
+             for i in range((len(rooms) + n - 1) // n)]
     return JsonResponse({"map": final}, safe=True, status=200)
+
 
 @api_view(["GET"])
 def all_players_on_map(request):
-    this_player= player = request.user.player.id
+    this_player = player = request.user.player.id
     player = list(Player.objects.values())
-    players = [{"id":o.get("id"), "x":o.get("x"), "y":o.get("y")} for o in player if o.get("id") != this_player]
-    
+    players = [{"id": o.get("id"), "x": o.get("x"), "y": o.get("y")}
+               for o in player if o.get("id") != this_player]
+
     return JsonResponse({"players": players}, safe=True, status=200)
 
 
