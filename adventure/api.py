@@ -87,7 +87,7 @@ def say(request):
 
 @api_view(["GET"])
 def fetch_maps(request):
-    rooms = list(Room.objects.values())
+    rooms = list(Room.objects.values().order_by("id"))
     n = 25
     final = [rooms[i * n:(i + 1) * n] for i in range((len(rooms) + n - 1) // n)]
     return JsonResponse({"map": final}, safe=True, status=200)
