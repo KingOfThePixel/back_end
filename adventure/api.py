@@ -54,6 +54,10 @@ def move(request):
         player.y = nextRoom.y
         player.save()
         players = nextRoom.playerNames(player_id)
+        list_players = list(Player.objects.values())
+        players_coords = [{"id": o.get("id"), "x": o.get("x"), "y": o.get("y")}
+                          for o in list if o.get("id") != player_id]
+        pusher.trigger(f'coords', u'move', {'players': players_coords})
         return JsonResponse({'name': player.user.username, 'room': nextRoomID, "x": player.x, "y": player.y,  'players': players, 'error_msg': ""}, safe=True)
     else:
         players = room.playerNames(player_id)
